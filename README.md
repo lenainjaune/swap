@@ -1,6 +1,9 @@
 # swap
 Tout ce qui concerne le swap
 
+# Quantité allouée
+https://opensource.com/article/18/9/swap-space-linux-systems
+
 ## Modifier partition de swap
 Cas d'étude : sur un notebook (Samsung NP-NC10) j'avais 1GB de RAM et alloué 2GB de swap à l'installation sur une partition dédiée (le système Emmabuntüs était installé sur l'autre partition). Les 2 partitions sont contigûes sur un même disque : la 1ère est la partition système, la 2ème est la partition swap. 
 
