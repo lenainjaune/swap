@@ -10,7 +10,7 @@ La partition système est faiblement occupée (~10GB/141GB), mais quand le syst�
 => il faut faire l'opération hors ligne (par exemple depuis un support Live CD ou USB)
 
 Procédure
-1. Booter sur un support Live (exemple : Emmabuntüs)
+1. Booter sur un support Live (testé : Emmabuntüs)
 1. Ouvrir **GParted**
 1. S'assurer qu'on peut bien récupérer de l'espace sur la partition système, sinon ce n'est pas la peine de poursuivre
 1. Redimmensionner la partition système en lui demandant de libérer 2048MB (= 2GB) à la fin
@@ -19,3 +19,6 @@ Procédure
 Nota : il n'est pas nécessaire de réactiver le swap dans la session Live avec **swapon -a**
 
 Remarque : au redémarrage, j'ai eu un message indiquant que j'avais upgradé ma RAM et si je voulais appliquer les changements, ce que j'ai accepté puis j'ai redémarré pour vérifier si le démarrage était plus rapide, un message Kernel Panic s'est affiché, j'ai redémarré => plus rien depuis...
+
+## swap sur une partition ou un fichier ? Nécessité ? Performance ?
+intéressant : https://serverfault.com/questions/25653/swap-partition-vs-file-for-performance
