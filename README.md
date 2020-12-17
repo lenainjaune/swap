@@ -4,7 +4,7 @@ Tout ce qui concerne le swap
 # Quantité allouée
 https://opensource.com/article/18/9/swap-space-linux-systems
 
-## Modifier partition de swap
+## Modifier partition de swap (Live GUI)
 Cas d'étude : sur un notebook (Samsung NP-NC10) j'avais 1GB de RAM et alloué 2GB de swap à l'installation sur une partition dédiée (le système Emmabuntüs était installé sur l'autre partition). Les 2 partitions sont contigûes sur un même disque : la 1ère est la partition système, la 2ème est la partition swap. 
 
 Pour améliorer ses performances, j'ai upgradé la RAM à 2GB.
@@ -25,3 +25,56 @@ Remarque : au redémarrage, j'ai eu un message indiquant que j'avais upgradé ma
 
 ## swap sur une partition ou un fichier ? Nécessité ? Performance ?
 intéressant : https://serverfault.com/questions/25653/swap-partition-vs-file-for-performance
+
+## Modifier partition de swap (Live CLI)
+On redimensionne la partition 1 (contient l'espace non utilisé) et on supprime la partition de swap
+Nota : on supprime aussi dans le cas présent la partition étendue qui contient uniquement la partition swap
+```sh
+root@host:~# parted
+(parted) print                                                            
+...
+Number  Start   End    Size    Type      File system     Flags
+ 1      1049kB  159GB  159GB   primary   ext4            boot
+ 2      159GB   160GB  1062MB  extended
+ 5      159GB   160GB  1062MB  logical   linux-swap(v1)
+(parted) resizepart                                                       
+Partition number? 1                                                       
+End?  [159GB]? 156GB
+Warning: Shrinking a partition can cause data loss, are you sure you want to continue?
+Yes/No? Yes
+(parted) print                                                            
+...
+Number  Start   End    Size    Type      File system     Flags
+ 1      1049kB  156GB  156GB   primary   ext4            boot
+ 2      159GB   160GB  1062MB  extended
+ 5      159GB   160GB  1062MB  logical   linux-swap(v1)
+(parted) rm 5
+(parted) rm 2
+(parted) print free
+(parted) quit
+...
+Number  Start   End     Size    Type     File system  Flags
+        32.3kB  1049kB  1016kB           Free Space
+ 1      1049kB  156GB   156GB   primary  ext4         boot
+        156GB   160GB   4042MB           Free Space
+``` 
+Je tente de recréer la partition swap depuis cet espace libre
+```sh
+root@host:~# parted
+(parted) help mkpart
+  mkpart PART-TYPE [FS-TYPE] START END     make a partition
+        PART-TYPE is one of: primary, logical, extended
+        FS-TYPE is one of: zfs, btrfs, nilfs2, ext4, ext3, ext2, fat32, fat16,
+        hfsx, hfs+, hfs, jfs, swsusp, linux-swap(v1), linux-swap(v0), ntfs,
+        ...
+        START and END are disk locations, such as 4GB or 10%.  Negative values
+        count from the end of the disk.  For example, -1s specifies exactly the
+        last sector.
+        
+        'mkpart' makes a partition without creating a new file system on the
+        partition.  FS-TYPE may be specified to set an appropriate partition
+        ID.
+
+(parted) mkpart
+Partition type?  primary/extended? primary
+```
