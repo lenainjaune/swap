@@ -26,7 +26,7 @@ Remarque : au redémarrage, j'ai eu un message indiquant que j'avais upgradé ma
 ## swap sur une partition ou un fichier ? Nécessité ? Performance ?
 intéressant : https://serverfault.com/questions/25653/swap-partition-vs-file-for-performance
 
-## Modifier partition de swap (Live CLI)
+## ATTENTION Modifier partition de swap (Live CLI) ATTENTION N'A PAS FONCTIONNE (partition système non accessible)
 On redimensionne la partition 1 (contient l'espace non utilisé) et on supprime la partition de swap
 
 Nota : on supprime aussi dans le cas présent la partition étendue qui contient uniquement la partition swap
