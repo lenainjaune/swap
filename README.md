@@ -28,6 +28,7 @@ intéressant : https://serverfault.com/questions/25653/swap-partition-vs-file-fo
 
 ## Modifier partition de swap (Live CLI)
 On redimensionne la partition 1 (contient l'espace non utilisé) et on supprime la partition de swap
+
 Nota : on supprime aussi dans le cas présent la partition étendue qui contient uniquement la partition swap
 ```sh
 root@host:~# parted
@@ -51,30 +52,42 @@ Number  Start   End    Size    Type      File system     Flags
 (parted) rm 5
 (parted) rm 2
 (parted) print free
-(parted) quit
 ...
 Number  Start   End     Size    Type     File system  Flags
         32.3kB  1049kB  1016kB           Free Space
  1      1049kB  156GB   156GB   primary  ext4         boot
         156GB   160GB   4042MB           Free Space
-``` 
-Je tente de recréer la partition swap depuis cet espace libre
+(parted) unit s
+(parted) print free
+...
+Number  Start       End         Size        Type     File system  Flags
+        63s         2047s       1985s                Free Space
+ 1      2048s       304687500s  304685453s  primary  ext4         boot
+        304687501s  312581807s  7894307s             Free Space
+
+(parted) quit
+```
+Calculs des frontières alignées de l'espace SWAP (sinon les performances ne seraient pas optimales selon l'avertissement qui s'affiche) :
+
+On voit après l'espace système que l'espace libre démarre à 304687501s et finit à 312581807s et il faut que cette espace aligné soit entre ces bornes. 
+Selon [ce lien](https://wiki.archlinux.org/index.php/Parted#Alignment), il faut un alignement à 2048 octets.
+
+304687501 / 2048 = 148773,193847656 arrondi supérieur à 148774 et 148774 x 2048 = 304689152 (> 304687501)
+
+312581807 / 2048 = 152627,835449219 arrondi inférieur à 152627 et 148774 x 2048 = 312580096 (< 312581807)
+
+Création de cet espace aligné depuis cet espace libre
 ```sh
 root@host:~# parted
-(parted) help mkpart
-  mkpart PART-TYPE [FS-TYPE] START END     make a partition
-        PART-TYPE is one of: primary, logical, extended
-        FS-TYPE is one of: zfs, btrfs, nilfs2, ext4, ext3, ext2, fat32, fat16,
-        hfsx, hfs+, hfs, jfs, swsusp, linux-swap(v1), linux-swap(v0), ntfs,
-        ...
-        START and END are disk locations, such as 4GB or 10%.  Negative values
-        count from the end of the disk.  For example, -1s specifies exactly the
-        last sector.
-        
-        'mkpart' makes a partition without creating a new file system on the
-        partition.  FS-TYPE may be specified to set an appropriate partition
-        ID.
+(parted) print free
+...
+Number  Start       End         Size        Type     File system  Flags
+        63s         2047s       1985s                Free Space
+ 1      2048s       304687500s  304685453s  primary  ext4         boot
+        304687501s  312581807s  7894307s             Free Space
 
-(parted) mkpart
-Partition type?  primary/extended? primary
+(parted) mkpart primary linux-swap(v1) 304689152s 312580096s
+(parted) align-check optimal 1                                            
+1 aligned
 ```
+=> partition SWAP créée et alignée
